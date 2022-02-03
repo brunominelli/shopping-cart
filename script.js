@@ -1,4 +1,7 @@
 const cartItems = document.querySelector('.cart__items');
+const emptyCart = document.querySelector('.empty-cart');
+const totalPrice = document.querySelector('.total-price');
+totalPrice.innerText = 0;
 
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
@@ -36,12 +39,12 @@ function setCart() {
 }
 
 function cartItemClickListener(event) {
+  // const itemPrice = event.target.innerText.split('$')[1];
   event.target.remove();
   setCart();
 }
 
 function getCart() {
-  // const cartItems = document.querySelector('.cart__items');
   cartItems.innerHTML = getSavedCartItems();
   cartItems.addEventListener('click', cartItemClickListener);
 }
@@ -54,11 +57,18 @@ function createCartItemElement({ sku, name, salePrice }) {
   return li;
 }
 
-const emptyCart = document.querySelector('.empty-cart');
-emptyCart.addEventListener('click', () => {
-  cartItems.innerHTML = '';
+function sum({ price }) {
+  const currentPrice = parseFloat(totalPrice.innerText);
+  const itemPrice = parseFloat(price);
+  const result = currentPrice + itemPrice;
+  totalPrice.innerText = result;
+}
+
+function clearCart() {
+  cartItems.children[0].textContent = '';
+  totalPrice.innerHTML = '';
   setCart();
-});
+}
 
 async function getProduct(product) {
   const { results } = await fetchProducts(product);
@@ -66,7 +76,6 @@ async function getProduct(product) {
     const { id, title, thumbnail } = item;
     const items = document.querySelector('.items');
     const listProducts = createProductItemElement({ sku: id, name: title, image: thumbnail });
-
     items.appendChild(listProducts);
   });
 }
@@ -75,9 +84,9 @@ async function getItem(event) {
   const item = event.target.parentNode;
   const itemID = getSkuFromProductItem(item);
   const { id, title, price } = await fetchItem(itemID);
-  // const cartItems = document.querySelector('.cart__items');
   const setItem = createCartItemElement({ sku: id, name: title, salePrice: price });
   cartItems.appendChild(setItem);
+  sum({ price });
   setCart();
 }
 
@@ -86,4 +95,5 @@ window.onload = async () => {
   getCart();
   const buttonsItemAdd = document.querySelectorAll('.item__add');
   buttonsItemAdd.forEach((button) => button.addEventListener('click', getItem));
+  emptyCart.addEventListener('click', clearCart);
 };
