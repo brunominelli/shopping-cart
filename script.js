@@ -65,9 +65,20 @@ function sum({ price }) {
 }
 
 function clearCart() {
-  cartItems.children[0].textContent = '';
-  totalPrice.innerHTML = '';
+  cartItems.innerHTML = '';
+  totalPrice.innerText = 0;
   setCart();
+}
+
+function loadingAPI() {
+  const loading = document.createElement('p');
+  loading.className = 'loading';
+  loading.innerText = 'carregando...';
+  document.querySelector('.items').appendChild(loading);
+}
+
+function stopLoadingAPI() {
+  document.querySelector('.loading').remove();
 }
 
 async function getProduct(product) {
@@ -91,7 +102,9 @@ async function getItem(event) {
 }
 
 window.onload = async () => {
+  loadingAPI();
   await getProduct('computador');
+  stopLoadingAPI();
   getCart();
   const buttonsItemAdd = document.querySelectorAll('.item__add');
   buttonsItemAdd.forEach((button) => button.addEventListener('click', getItem));
