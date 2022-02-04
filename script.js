@@ -26,7 +26,7 @@ function createTotal() {
 
 function setTotal() {
   const totalPrice = document.querySelector('.total-price');
-  totalPrice.innerText = total.toFixed(2);
+  totalPrice.innerText = total;
 }
 
 function createProductItemElement({ sku, name, image }) {
@@ -51,7 +51,8 @@ function setCart() {
 }
 
 function cartItemClickListener(event) {
-  cartItems.removeChild(event.target);
+  console.log(event.target.parentNode);
+  event.target.remove();
   const stringPrice = event.target.innerText.split('$')[1];
   const price = parseFloat(stringPrice);
   total -= price;
@@ -66,15 +67,18 @@ function getCart() {
 
 function createCartItemElement({ sku, name, salePrice }) {
   const li = document.createElement('li');
-  li.className = 'cart__item item';
-  li.innerText = `SKU: ${sku}\n\nNAME: ${name}\n\nPRICE: $${salePrice}`;
+  li.className = 'cart__item';
+  li.innerText = `SKU: ${sku} | NAME: ${name} | PRICE: $${salePrice}`;
   li.addEventListener('click', cartItemClickListener);
   return li;
 }
 
 function clearCart() {
-  total = 0;
+  const totalPrice = document.querySelector('.total-price');
+  totalPrice.innerText = 0;
   cartItems.innerHTML = '';
+  total = 0;
+  setTotal();
   setCart();
 }
 
@@ -104,7 +108,7 @@ async function getItem(event) {
   const itemID = getSkuFromProductItem(item);
   const { id, title, price } = await fetchItem(itemID);
   const setItem = createCartItemElement({ sku: id, name: title, salePrice: price });
-  total += price;
+  total += parseFloat(price);
   setTotal();
   cartItems.appendChild(setItem);
   setCart();
