@@ -1,7 +1,6 @@
-const cartItems = document.querySelector('.cart__items');
+const cartItems = document.querySelector('ol.cart__items');
 const emptyCart = document.querySelector('.empty-cart');
-const totalPrice = document.querySelector('.total-price');
-totalPrice.innerText = 0;
+let total = 0;
 
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
@@ -15,6 +14,19 @@ function createCustomElement(element, className, innerText) {
   e.className = className;
   e.innerText = innerText;
   return e;
+}
+
+function createTotal() {
+  const cart = document.querySelector('.cart');
+  const totalPrice = document.createElement('p');
+  totalPrice.className = 'total-price';
+  totalPrice.innerText = total;
+  cart.appendChild(totalPrice);
+}
+
+function setTotal() {
+  const totalPrice = document.querySelector('.total-price');
+  totalPrice.innerText = total.toFixed(2);
 }
 
 function createProductItemElement({ sku, name, image }) {
@@ -39,8 +51,11 @@ function setCart() {
 }
 
 function cartItemClickListener(event) {
-  // const itemPrice = event.target.innerText.split('$')[1];
-  event.target.remove();
+  cartItems.removeChild(event.target);
+  const stringPrice = event.target.innerText.split('$')[1];
+  const price = parseFloat(stringPrice);
+  total -= price;
+  setTotal();
   setCart();
 }
 
@@ -57,16 +72,9 @@ function createCartItemElement({ sku, name, salePrice }) {
   return li;
 }
 
-function sum({ price }) {
-  const currentPrice = parseFloat(totalPrice.innerText);
-  const itemPrice = parseFloat(price);
-  const result = currentPrice + itemPrice;
-  totalPrice.innerText = result;
-}
-
 function clearCart() {
+  total = 0;
   cartItems.innerHTML = '';
-  totalPrice.innerText = 0;
   setCart();
 }
 
@@ -96,8 +104,9 @@ async function getItem(event) {
   const itemID = getSkuFromProductItem(item);
   const { id, title, price } = await fetchItem(itemID);
   const setItem = createCartItemElement({ sku: id, name: title, salePrice: price });
+  total += price;
+  setTotal();
   cartItems.appendChild(setItem);
-  sum({ price });
   setCart();
 }
 
@@ -106,6 +115,7 @@ window.onload = async () => {
   await getProduct('computador');
   stopLoadingAPI();
   getCart();
+  createTotal();
   const buttonsItemAdd = document.querySelectorAll('.item__add');
   buttonsItemAdd.forEach((button) => button.addEventListener('click', getItem));
   emptyCart.addEventListener('click', clearCart);
